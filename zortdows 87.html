@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="tr"><head>
+<meta charset="UTF-8">
+<title>Masaüstü</title>
+<style>body {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(120deg, #0a3d62, #1e90ff);
+    font-family: Segoe UI, Arial;
+    overflow: hidden;
+    user-select: none;
+}
+
+/* Masaüstü */
+.desktop {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 80px);
+    gap: 20px;
+}
+
+.icon {
+    width: 80px;
+    text-align: center;
+    color: white;
+    cursor: pointer;
+}
+
+.icon img {
+    width: 64px;
+}
+
+.icon:hover {
+    background: rgba(255,255,255,0.15);
+    border-radius: 6px;
+}
+
+/* Görev çubuğu */
+.taskbar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 40px;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    color: white;
+}
+
+/* Pencere */
+.window {
+    position: absolute;
+    top: 80px;
+    left: 200px;
+    width: 800px;
+    height: 500px;
+    background: #f1f1f1;
+    border-radius: 6px;
+    box-shadow: 0 0 15px black;
+    display: none;
+    overflow: hidden;
+}
+
+.titlebar {
+    background: #0078D7;
+    color: white;
+    padding: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close {
+    cursor: pointer;
+}
+
+/* Chrome */
+.browser-bar {
+    display: flex;
+    padding: 6px;
+    background: #e5e5e5;
+}
+
+.browser-bar input {
+    flex: 1;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.browser-bar button {
+    margin-left: 6px;
+}
+
+iframe {
+    width: 100%;
+    height: calc(100% - 78px);
+    border: none;
+}
+#pyCode {
+    width: 100%;
+    height: 200px;
+    font-family: monospace;
+}
+
+#pyOutput {
+    background: black;
+    color: #0f0;
+    height: 150px;
+    overflow: auto;
+    padding: 6px;
+}
+
+.explorer-container {
+    display: flex;
+    height: 350px;
+}
+
+.folders {
+    width: 150px;
+    background: #ddd;
+    padding: 10px;
+    border-right: 1px solid #aaa;
+}
+
+.folders ul, .files ul {
+    list-style: none;
+    padding: 0;
+}
+
+.folders li, .files li {
+    padding: 4px;
+    cursor: pointer;
+}
+
+.folders li:hover, .files li:hover {
+    background: rgba(0,0,0,0.1);
+}
+
+.files {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+
+
+#saat {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    font-family: Arial, sans-serif;
+    font-size: 17px;
+}
+
+.task-icon img {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+
+</style>
+
+</head>
+
+<body id="desktop" style="background-image: url(&quot;https://uploads.onecompiler.io/446ptsdzc/446ptk3qx/zortmen.png&quot;);">
+<div id="loginScreen" style="position: fixed; inset: 0px; background: rgb(10, 61, 98); display: none; align-items: center; justify-content: center; z-index: 9999; color: white;">
+
+  <div style="text-align:center">
+    <h2>Hoş geldin</h2>
+    <input id="loginUser" placeholder="Kullanıcı adı"><br><br>
+    <input id="loginPass" type="password" placeholder="Şifre"><br><br>
+    <button onclick="login()">Giriş</button>
+  </div>
+</div>
+<script>function login(){
+  if(loginUser.value && loginPass.value){
+    localStorage.setItem("user", loginUser.value);
+    loginScreen.style.display="none";
+    notify("Hoş geldin "+loginUser.value);
+  }
+}
+if(localStorage.getItem("user")){
+  loginScreen.style.display="none";
+}
+</script>
+<!------------------------------>
+  <div class="desktop"> 
+    <!-- python -->
+      <div class="icon" onclick="openWindow('python')"> 
+      <img src="https://img.icons8.com/color/96/python.png"> 
+      <div>Python</div> 
+    </div>
+
+    <div class="icon" onclick="openWindow('gameWindow')">
+       <img src="https://img.icons8.com/color/96/controller.png">
+       <div>Oyunlar</div>
+    </div>
+
+    <div class="icon" onclick="openWindow('paint')">
+       <img src="https://img.icons8.com/color/96/paint.png">
+       <div>Paint</div>
+    </div>
+
+<div class="icon" onclick="openWindow('calculator')">
+  <img src="https://img.icons8.com/color/96/calculator.png">
+  <div>Hesap Makinesi</div>
+</div>
+
+    <!-- Chrome -->
+    <div class="icon" onclick="openWindow('chrome')">
+        <img src="https://img.icons8.com/color/96/chrome.png">
+        <div>Google Chrome</div>
+    </div>
+
+    <!-- Not Defteri -->
+    <div class="icon" onclick="openWindow('notepad')">
+        <img src="https://img.icons8.com/color/96/notepad.png">
+        <div>Not Defteri</div>
+    </div>
+    <!-- Ayarlar -->
+    <div class="icon" onclick="openWindow('settings')">
+        <img src="https://img.icons8.com/color/96/settings.png">
+        <div>Ayarlar</div>
+    </div>
+
+<!-- CHROME -->
+<div class="window" id="chrome">
+    <div class="titlebar">
+        Google Chrome
+        <span onclick="closeWindow('chrome')">✖</span>
+        
+        <span onclick="toggleFullScreen(this)" style="cursor:pointer; margin-left:5px">⛶</span>
+        
+        
+    </div>
+
+    <div class="browser-bar">
+        <button onclick="refreshTab()">⟳</button>
+        <input id="url" value="https://pierrepapierciseaux.net/.skynet/" onkeydown="enterSite(event)">
+        <button onclick="loadSite()">Git</button>
+    </div>
+
+    <iframe id="browser"></iframe>
+</div>
+
+<div class="icon" onclick="openWindow('explorer')">
+    <img src="https://img.icons8.com/color/96/folder-invoices.png">
+    <div>Dosya Gezgini</div>
+</div>
+
+
+<!-- NOT DEFTERİ -->
+<div class="window" id="notepad">
+    <div class="titlebar">
+        Not Defteri
+        <span onclick="closeWindow('notepad')">✖</span>
+        <span onclick="toggleFullScreen(this)" style="cursor:pointer; margin-left:5px">⛶</span>
+    </div>
+
+    <div class="notepad-toolbar">
+        <button onclick="newFile()">Yeni</button>
+        <button onclick="saveFile()">Kaydet</button>
+        <select id="fileList" onchange="loadFile()"><option value="zortmen">zortmen</option></select>
+    </div>
+
+    <textarea id="textArea" placeholder="Metin yaz..."></textarea>
+</div>
+
+<!-- AYARLAR -->
+<div class="window" id="settings">
+    <div class="titlebar">
+        Ayarlar
+        <span onclick="closeWindow('settings')">✖</span>
+        
+    </div>
+
+    <div class="content" style="padding:10px">
+
+  <h3>🎨 Görünüm</h3>
+  <input id="bgUrl" placeholder="Arka plan linki gir">
+  <button onclick="changeBackground()">Uygula</button>
+  <p>Bu sahte OS'u <strong>İbrahim Çınar Arslan</strong> yapmıştır.</p>
+
+
+</div>
+
+</div>
+
+<!-- PYTHON -->
+<div class="window" id="python">
+    <div class="titlebar">
+        Python (.py)
+        <span onclick="closeWindow('python')">✖</span>
+        <span onclick="toggleFullScreen(this)" style="cursor:pointer; margin-left:5px">⛶</span>
+    </div>
+
+    <div class="notepad-toolbar">
+        <button onclick="newPy()">Yeni</button>
+        <button onclick="savePy()">Kaydet</button>
+        <button onclick="runPy()">Çalıştır ▶</button>
+        <select id="pyList" onchange="loadPy()"><option value="zortmen">zortmen</option></select>
+    </div>
+
+    <textarea id="pyCode" placeholder="print('Merhaba')"></textarea>
+    <pre id="pyOutput"></pre>
+</div>
+<div class="window" id="explorer">
+    <div class="titlebar">
+        Dosya Gezgini
+        <span onclick="closeWindow('explorer')">✖</span>
+        <span onclick="toggleFullScreen(this)" style="cursor:pointer; margin-left:5px">⛶</span>
+    </div>
+    <div class="explorer-container">
+        <div class="folders">
+            <h4>Klasörler</h4>
+            <ul>
+                <li onclick="showFolder('Masaüstü')">Masaüstü</li>
+                <li onclick="showFolder('Belgeler')">Not Defteri</li>
+                <li onclick="showFolder('Python')">Python</li>
+            </ul>
+        </div>
+        <div class="files">
+            <h4>Dosyalar</h4>
+            <ul id="fileView"></ul>
+        </div>
+    </div>
+</div>
+
+<div class="window" id="gameWindow">
+    <div class="titlebar">
+        Oyunlar
+        <span onclick="closeWindow('gameWindow')">✖</span>
+        <span onclick="toggleFullScreen(this)" style="cursor:pointer; margin-left:5px">⛶</span>
+    </div>
+
+    <iframe id="gameIframe" src="https://zortmen.github.io/Zortmen-Sitesi/oyun.html">
+    </iframe>
+</div>
+<div class="window" id="paint">
+    <div class="titlebar">
+        paint
+        <span onclick="closeWindow('paint')">✖</span>
+        <span onclick="toggleFullScreen(this)" style="cursor:pointer; margin-left:5px">⛶</span>
+    </div>
+
+    <iframe id="gameIframe" src="https://jspaint.app/">
+    </iframe>
+</div>
+<div class="window" id="calculator">
+  <div class="titlebar">
+    Hesap Makinesi
+    <span onclick="closeWindow('calculator')">✖</span>
+  </div>
+  <div style="padding:10px">
+    <input id="calcDisplay" readonly="" style="width:100%;height:40px;font-size:20px;text-align:right">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:5px">
+      <button onclick="c('7')">7</button>
+      <button onclick="c('8')">8</button>
+      <button onclick="c('9')">9</button>
+      <button onclick="c('/')">÷</button>
+      <button onclick="c('4')">4</button>
+      <button onclick="c('5')">5</button>
+      <button onclick="c('6')">6</button>
+      <button onclick="c('*')">×</button>
+      <button onclick="c('1')">1</button>
+      <button onclick="c('2')">2</button>
+      <button onclick="c('3')">3</button>
+      <button onclick="c('-')">−</button>
+      <button onclick="c('0')">0</button>
+      <button onclick="c('.')">.</button>
+      <button onclick="clr()">C</button>
+      <button onclick="c('+')">+</button>
+      <button onclick="res()" style="grid-column:span 4">=</button>
+    </div>
+  </div>
+</div>
+<script>
+let expr="";
+function c(v){expr+=v;calcDisplay.value=expr}
+function clr(){expr="";calcDisplay.value=""}
+function res(){
+  try{expr=eval(expr).toString();calcDisplay.value=expr}
+  catch{calcDisplay.value="Hata";expr=""}
+}
+</script>
+<script>
+document.querySelectorAll(".icon").forEach((icon,i)=>{
+  const label=icon.querySelector("div");
+
+  const saved=localStorage.getItem("icon_name_"+i);
+  if(saved) label.innerText=saved;
+
+  icon.addEventListener("contextmenu",e=>{
+    e.preventDefault();
+    const n=prompt("Yeni ad:",label.innerText);
+    if(n && n.trim()){
+      label.innerText=n.trim();
+      localStorage.setItem("icon_name_"+i,n.trim());
+    }
+  });
+});
+</script>
+
+
+<div class="taskbar">🔊 📶&nbsp;&nbsp;
+<div class="task-icon" onclick="openWindow('python')">
+  <img src="https://img.icons8.com/color/96/python.png" width="30px" class="python_taskbar_ikonu">
+</div>
+
+<div class="task-icon" onclick="openWindow('gameWindow')">
+  <img src="https://img.icons8.com/color/96/controller.png"width="30px">
+</div>
+<div class="task-icon" onclick="openWindow('paint')">
+  <img src="https://img.icons8.com/color/96/paint.png"width="30px">
+</div>
+
+<div class="task-icon" onclick="openWindow('calculator')">
+  <img src="https://img.icons8.com/color/96/calculator.png"width="30px">
+</div>
+
+<div class="task-icon" onclick="openWindow('chrome')">
+  <img src="https://img.icons8.com/color/96/chrome.png"width="30px">
+</div>
+<div class="task-icon" onclick="openWindow('notepad')">
+  <img src="https://img.icons8.com/color/96/notepad.png"width="30px">
+</div>
+<div id="saat">11:20 26.01.2026</div>
+</div>
+
+  
+</div>
+<script>
+function refreshTab(){
+    let iframe = document.getElementById("browser");
+    let src = iframe.src;
+    iframe.src = "";
+    iframe.src = src;
+}
+
+function saatiGuncelle() {
+    const now = new Date();
+
+    const saat = String(now.getHours()).padStart(2, '0');
+    const dakika = String(now.getMinutes()).padStart(2, '0');
+
+    const gun = String(now.getDate()).padStart(2, '0');
+    const ay = String(now.getMonth() + 1).padStart(2, '0');
+    const yil = now.getFullYear();
+
+    document.getElementById("saat").innerText =
+        `${saat}:${dakika} ${gun}.${ay}.${yil}`;
+}
+
+saatiGuncelle();
+setInterval(saatiGuncelle, 1000);
+/* Pencere */
+function openWindow(id) {
+    document.getElementById(id).style.display = "block";
+
+    // Eğer oyun penceresi açılıyorsa, iframe'i yenile
+    if(id === "gameWindow") {
+        let iframe = document.getElementById("gameIframe");
+        let src = iframe.src;
+        iframe.src = ""; // önce boş yap
+        iframe.src = src; // sonra tekrar ata
+    }
+}
+
+function closeWindow(id) {
+    document.getElementById(id).style.display = "none";
+}
+
+//iframe engeli 
+if (window.top !== window.self) {
+    document.body.innerHTML = `
+        <div style="
+            font-family: monospace;
+            background:#000;
+            color:#0f0;
+            padding:20px">
+            🚫 zortOS iframe içinde çalıştırılamaz.
+        </div>
+    `;
+}
+
+
+
+/* Chrome */
+function loadSite(){
+    let url=document.getElementById("url").value;
+    if(!url.startsWith("http")) url="https://"+url;
+    document.getElementById("browser").src=url;
+}
+function enterSite(e){ if(e.key==="Enter") loadSite(); }
+
+/* Arkaplan */
+function changeBackground(){
+    let url=document.getElementById("bgUrl").value;
+    document.body.style.backgroundImage=`url('${url}')`;
+    localStorage.setItem("bg",url);
+}
+if(localStorage.getItem("bg")){
+    document.body.style.backgroundImage=`url('${localStorage.getItem("bg")}')`;
+}
+
+
+/* Not Defteri */
+let currentFile=null;
+
+function newFile(){
+    currentFile=prompt("Dosya adı:");
+    if(currentFile){
+        localStorage.setItem("txt_"+currentFile,"");
+        loadFileList();
+        document.getElementById("textArea").value="";
+    }
+}
+
+function saveFile(){
+    if(!currentFile){
+        alert("Dosya seçili değil");
+        return;
+    }
+    localStorage.setItem("txt_"+currentFile,document.getElementById("textArea").value);
+}
+
+function loadFile(){
+    currentFile=document.getElementById("fileList").value;
+    document.getElementById("textArea").value=
+        localStorage.getItem("txt_"+currentFile)||"";
+}
+
+function loadFileList(){
+    let list=document.getElementById("fileList");
+    list.innerHTML="";
+    for(let k in localStorage){
+        if(k.startsWith("txt_")){
+            let opt=document.createElement("option");
+            opt.value=k.replace("txt_","");
+            opt.textContent=opt.value;
+            list.appendChild(opt);
+        }
+    }
+}
+loadFileList();
+</script>
+<script>
+let pyCurrent = null;
+
+/* Dosya işlemleri */
+function newPy(){
+    pyCurrent = prompt("Dosya adı (.py):");
+    if(pyCurrent){
+        localStorage.setItem("py_"+pyCurrent,"");
+        loadPyList();
+        pyCode.value="";
+        pyOutput.textContent="";
+    }
+}
+
+function savePy(){
+    if(!pyCurrent) return alert("Dosya yok");
+    localStorage.setItem("py_"+pyCurrent, pyCode.value);
+}
+
+function loadPy(){
+    pyCurrent = pyList.value;
+    pyCode.value = localStorage.getItem("py_"+pyCurrent) || "";
+}
+
+
+
+/* Liste */
+function loadPyList(){
+    pyList.innerHTML="";
+    for(let k in localStorage){
+        if(k.startsWith("py_")){
+            let o=document.createElement("option");
+            o.value=k.replace("py_","");
+            o.textContent=o.value;
+            pyList.appendChild(o);
+        }
+    }
+}
+loadPyList();
+
+/* PYTHON ÇALIŞTIR */
+function runPy(){
+    pyOutput.textContent="";
+    let vars = {};
+    let lines = pyCode.value.split("\n");
+
+    for(let i=0;i<lines.length;i++){
+        let line = lines[i].trim();
+
+        /* print */
+        if(line.startsWith("print")){
+            let content = line.match(/print\((.*)\)/)[1];
+            pyOutput.textContent += evalExpr(content, vars) + "\n";
+        }
+
+        /* input */
+        else if(line.includes("= input")){
+            let name = line.split("=")[0].trim();
+            let msg = line.match(/input\((.*)\)/)[1];
+            vars[name] = prompt(evalExpr(msg, vars));
+        }
+
+        /* if */
+        else if(line.startsWith("if")){
+            let cond = line
+                .replace("if","")
+                .replace(":","")
+                .trim();
+
+            let result = evalCond(cond, vars);
+            if(!result){
+                i++; // bir satır atla
+            }
+        }
+
+        /* değişken */
+        else if(line.includes("=")){
+            let [a,b] = line.split("=");
+            vars[a.trim()] = evalExpr(b.trim(), vars);
+        }
+    }
+}
+
+/* Yardımcılar */
+function evalExpr(expr, vars){
+    for(let v in vars){
+        expr = expr.replaceAll(v, `"${vars[v]}"`);
+    }
+    return eval(expr);
+}
+
+function evalCond(cond, vars){
+    for(let v in vars){
+        cond = cond.replaceAll(v, `"${vars[v]}"`);
+    }
+    return eval(cond);
+}
+</script>
+<script>
+  let currentFolder = "Masaüstü";
+
+function showFolder(folder){
+    currentFolder = folder;
+    let view = document.getElementById("fileView");
+    view.innerHTML = "";
+
+    // Tüm localStorage dosyalarını al
+    for(let k in localStorage){
+        let type = "";
+        if(k.startsWith("txt_")) type = "txt";
+        if(k.startsWith("py_")) type = "py";
+        if(!type) continue;
+
+        // Dosya hangi klasördeyse göster
+        if(folder==="Masaüstü" && k.includes("_desktop")) view.appendChild(fileItem(k, type));
+        else if(folder==="Python" && type==="py") view.appendChild(fileItem(k, type));
+        else if(folder==="Belgeler" && type==="txt") view.appendChild(fileItem(k, type));
+    }
+}
+
+function fileItem(key, type){
+    let li = document.createElement("li");
+    li.textContent = key.replace(type+"_","");
+    
+    // Dosyaya tıklayınca aç
+    li.onclick = ()=>{
+        if(type==="txt"){
+            currentFile = key.replace("txt_","");
+            document.getElementById("textArea").value = localStorage.getItem(key)||"";
+            openWindow('notepad');
+        }
+        else if(type==="py"){
+            pyCurrent = key.replace("py_","");
+            document.getElementById("pyCode").value = localStorage.getItem(key)||"";
+            openWindow('python');
+        }
+    };
+
+    // Sağ tık → sadece dosya sil
+    li.oncontextmenu = (e)=>{
+        e.preventDefault(); // default sağ tık menüyü engelle
+        if(confirm(`"${li.textContent}" silinsin mi?`)){
+            localStorage.removeItem(key); // sadece dosyayı kaldır
+            showFolder(currentFolder);     // paneli güncelle
+        }
+    };
+
+    return li;
+}
+
+// İlk açılış
+showFolder(currentFolder);
+
+</script>
+
+<script>function toggleFullScreen(el){
+  let win = el.closest(".window");
+  if(!win.classList.contains("fullscreen")){
+    // Tam ekran yap
+    win.dataset.oldStyle = JSON.stringify({
+      left: win.style.left,
+      top: win.style.top,
+      width: win.style.width,
+      height: win.style.height,
+      z: win.style.zIndex
+    });
+    win.style.left = "0";
+    win.style.top = "0";
+    win.style.width = "100vw";
+    win.style.height = "100vh";
+    win.style.zIndex = 9999;
+    win.classList.add("fullscreen");
+  } else {
+    // Önceki boyutları geri getir
+    let old = JSON.parse(win.dataset.oldStyle);
+    win.style.left = old.left;
+    win.style.top = old.top;
+    win.style.width = old.width;
+    win.style.height = old.height;
+    win.style.zIndex = old.z;
+    win.classList.remove("fullscreen");
+  }
+}
+</script>
+
+<script>
+let activeWindow = null;
+let offsetX = 0;
+let offsetY = 0;
+let topZ = 1000;
+
+document.addEventListener("mousedown", (e) => {
+  const titlebar = e.target.closest(".titlebar");
+  if (!titlebar) return;
+
+  const win = titlebar.parentElement;
+
+  // tam ekrandaysa sürükleme yok
+  if (win.classList.contains("fullscreen")) return;
+
+  activeWindow = win;
+  offsetX = e.clientX - win.offsetLeft;
+  offsetY = e.clientY - win.offsetTop;
+
+  // öne getir
+  topZ++;
+  win.style.zIndex = topZ;
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (!activeWindow) return;
+
+  activeWindow.style.left = (e.clientX - offsetX) + "px";
+  activeWindow.style.top  = (e.clientY - offsetY) + "px";
+});
+
+document.addEventListener("mouseup", () => {
+  activeWindow = null;
+});
+</script>
+
+
+
+</body></html>
