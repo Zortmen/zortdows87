@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="tr"><head>
+  <meta charset="UTF-8">
+  <title>Mini 3D Minecraft</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    #info {
+      position: fixed;
+      top: 10px; left: 10px;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      padding: 8px 12px;
+      font-family: Arial;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+<div id="info">
+  WASD: hareket | Mouse: bakış | Sol tık: blok kır | Sağ tık: blok koy
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+// SAHNE
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
+
+// KAMERA
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.set(0, 5, 10);
+
+// RENDERER
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// IŞIK
+scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+const sun = new THREE.DirectionalLight(0xffffff, 0.6);
+sun.position.set(10,20,10);
+scene.add(sun);
+
+// BLOK
+const blockGeo = new THREE.BoxGeometry(1,1,1);
+const grassMat = new THREE.MeshStandardMaterial({color: 0x00aa00});
+
+const blocks = [];
+
+function addBlock(x,y,z){
+  const block = new THREE.Mesh(blockGeo, grassMat);
+  block.position.set(x,y,z);
+  scene.add(block);
+  blocks.push(block);
+}
+
+// DÜNYA
+for(let x=-10;x<=10;x++){
+  for(let z=-10;z<=10;z++){
+    addBlock(x,0,z);
+  }
+}
+
+// KONTROLLER (BASİT FPS)
+const keys = {};
+let yaw = 0, pitch = 0;
+
+window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+window.addEventListener('mousemove', e => {
+  if(document.pointerLockElement){
+    yaw -= e.movementX * 0.002;
+    pitch -= e.movementY * 0.002;
+    pitch = Math.max(-Math.PI/2, Math.min(Math.PI/2, pitch));
+    camera.rotation.set(pitch, yaw, 0);
+  }
+});
+
+document.body.addEventListener('click', ()=>{
+  document.body.requestPointerLock();
+});
+
+// RAYCAST (BLOK KIR / KOY)
+const raycaster = new THREE.Raycaster();
+window.addEventListener('mousedown', e => {
+  raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+  const hit = raycaster.intersectObjects(blocks);
+  if(hit.length>0){
+    if(e.button === 0){ // kır
+      scene.remove(hit[0].object);
+      blocks.splice(blocks.indexOf(hit[0].object),1);
+    }
+    if(e.button === 2){ // koy
+      const p = hit[0].point.clone().add(hit[0].face.normal);
+      addBlock(Math.round(p.x),Math.round(p.y),Math.round(p.z));
+    }
+  }
+});
+
+// SAĞ TIK MENÜ ENGELLE
+window.addEventListener('contextmenu', e=>e.preventDefault());
+
+// OYUN DÖNGÜSÜ
+function animate(){
+  requestAnimationFrame(animate);
+  const speed = 0.1;
+  const dir = new THREE.Vector3();
+  camera.getWorldDirection(dir);
+  dir.y = 0;
+  dir.normalize();
+
+  if(keys['w']) camera.position.add(dir.clone().multiplyScalar(speed));
+  if(keys['s']) camera.position.add(dir.clone().multiplyScalar(-speed));
+  if(keys['a']) camera.position.add(new THREE.Vector3().crossVectors(camera.up, dir).normalize().multiplyScalar(speed));
+  if(keys['d']) camera.position.add(new THREE.Vector3().crossVectors(dir, camera.up).normalize().multiplyScalar(speed));
+
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', ()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script><canvas data-engine="three.js r160" width="699" height="897" style="display: block; width: 699px; height: 897px;"></canvas>
+
+
+</body></html>

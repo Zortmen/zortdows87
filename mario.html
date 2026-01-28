@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Süper Zort ∞ (Lav)</title>
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #5c94fc;
+}
+canvas {
+  display: block;
+}
+</style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+function resize(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resize);
+resize();
+
+// ---------------- CONSTANTS ----------------
+const GRAVITY = 1;
+const JUMP = -18;
+const SPEED = 6;
+const CHUNK_WIDTH = 500;
+
+let LAVA_Y, PLATFORM_Y;
+
+// ---------------- INPUT ----------------
+const keys = {};
+window.addEventListener("keydown", e => keys[e.code]=true);
+window.addEventListener("keyup", e => keys[e.code]=false);
+
+// ---------------- MARIO ----------------
+let mario = {
+  x: 50,
+  y: 0,
+  prevY: 0,   // 👈 EKLENDİ
+  w: 30,
+  h: 40,
+  vy: 0,
+  onGround: false
+};
+
+
+// ---------------- WORLD ----------------
+let platforms = [];
+let lava = [];
+let camX = 0;
+
+function updateHeights(){
+  LAVA_Y = canvas.height - 60;
+  PLATFORM_Y = canvas.height - 140;
+  mario.y = PLATFORM_Y - mario.h;
+}
+updateHeights();
+
+// ---------------- LEVEL GEN ----------------
+function spawnChunk(startX){
+  lava.push({x:startX, y:LAVA_Y, w:CHUNK_WIDTH, h:canvas.height});
+
+  let x = startX;
+  for(let i=0;i<4;i++){
+    let w = 120 + Math.random()*60;
+    let dy = [0,-60,-120][Math.floor(Math.random()*3)];
+    platforms.push({
+      x:x,
+      y:PLATFORM_Y+dy,
+      w:w,
+      h:20
+    });
+    x += w + 100;
+  }
+}
+
+spawnChunk(0);
+spawnChunk(CHUNK_WIDTH);
+
+// ---------------- GAME LOOP ----------------
+function loop(){
+  mario.prevY = mario.y;
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+loop();
+
+// ---------------- LOGIC ----------------
+function update(){
+  // movement
+  if(keys["ArrowLeft"]) mario.x -= SPEED;
+  if(keys["ArrowRight"]) mario.x += SPEED;
+  if(keys["Space"] && mario.onGround){
+    mario.vy = JUMP;
+    mario.onGround = false;
+  }
+
+  mario.vy += GRAVITY;
+  mario.y += mario.vy;
+
+  mario.onGround = false;
+
+for(const p of platforms){
+  const wasAbove =
+    mario.prevY + mario.h <= p.y;
+
+  if(
+    hit(mario,p) &&
+    wasAbove &&
+    mario.vy >= 0
+  ){
+    mario.y = p.y - mario.h;
+    mario.vy = 0;
+    mario.onGround = true;
+  }
+}
+
+
+  // lava
+  for(const l of lava){
+    if(hit(mario,l)) reset();
+  }
+
+  // camera
+  if(mario.x - camX > canvas.width*0.6){
+    camX += SPEED;
+  }
+
+  // spawn more
+  let far = Math.max(...platforms.map(p=>p.x+p.w));
+  if(far - camX < canvas.width){
+    spawnChunk(far);
+  }
+
+  // cleanup
+  platforms = platforms.filter(p=>p.x+p.w-camX>-200);
+  lava = lava.filter(l=>l.x+l.w-camX>-200);
+}
+
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // lava
+  ctx.fillStyle="orange";
+  for(const l of lava){
+    ctx.fillRect(l.x-camX,l.y,l.w,l.h);
+  }
+
+  // platforms
+  ctx.fillStyle="green";
+  for(const p of platforms){
+    ctx.fillRect(p.x-camX,p.y,p.w,p.h);
+  }
+
+  // mario
+  ctx.fillStyle="red";
+  ctx.fillRect(mario.x-camX,mario.y,mario.w,mario.h);
+}
+
+function hit(a,b){
+  return a.x < b.x+b.w &&
+         a.x+a.w > b.x &&
+         a.y < b.y+b.h &&
+         a.y+a.h > b.y;
+}
+
+function reset(){
+  camX = 0;
+
+  mario.x = 50;
+  mario.y = -100;      // 👈 YUKARIDAN BAŞLA
+  mario.vy = 0;
+  mario.onGround = false;
+
+  platforms = [];
+  lava = [];
+
+  spawnChunk(0);
+  spawnChunk(CHUNK_WIDTH);
+}
+
+</script>
+
+</body>
+</html>
+

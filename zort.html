@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>ZORTMEN vs ANTİZORT</title>
+<style>
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#cfe9f3;
+}
+canvas{display:block;}
+#msg{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font:28px Arial;
+  color:red;
+  display:none;
+}
+</style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+<div id="msg">ANTİZORT KAZANDI 💀<h6>&nbsp;&nbsp;
+
+Bir Zortmen Olamazsın.</h6></div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const msg = document.getElementById("msg");
+
+function resize(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+const GRAVITY = 1.2;
+const SPEED = 5;
+const JUMP = -18;
+
+let groundY;
+let vx = 0;
+let vy = 0;
+let onGround = false;
+let alive = true;
+
+const zort = {x:50,y:0,w:60,h:60};
+const body = {x:65,y:0,w:30,h:50};
+const anti = {x:600,y:0,w:50,h:50,vx:-3};
+
+function reset(){
+  groundY = canvas.height - 50;
+  zort.x = 50;
+  body.x = 65;
+  zort.y = groundY - 110;
+  body.y = groundY - 50;
+  anti.x = canvas.width - 120;
+  anti.y = groundY - 50;
+  vy = 0;
+  onGround = true;
+  alive = true;
+  msg.style.display = "none";
+}
+reset();
+
+const keys = {};
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+function collide(a,b){
+  return (
+    a.x < b.x + b.w &&
+    a.x + a.w > b.x &&
+    a.y < b.y + b.h &&
+    a.y + a.h > b.y
+  );
+}
+
+function loop(){
+  if(!alive) return;
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // INPUT
+  vx = 0;
+  if(keys["ArrowLeft"])  vx = -SPEED;
+  if(keys["ArrowRight"]) vx = SPEED;
+  if(keys["ArrowUp"] && onGround){
+    vy = JUMP;
+    onGround = false;
+  }
+
+  // PHYSICS
+  vy += GRAVITY;
+
+  zort.x += vx;
+  body.x += vx;
+  zort.y += vy;
+  body.y += vy;
+
+  // GROUND COLLISION
+  if(body.y + body.h >= groundY){
+    body.y = groundY - body.h;
+    zort.y = body.y - zort.h;
+    vy = 0;
+    onGround = true;
+  }
+
+  // ANTİZORT AI
+  anti.x += anti.vx;
+  if(anti.x <= 0 || anti.x + anti.w >= canvas.width){
+    anti.vx *= -1;
+  }
+
+  // DRAW GROUND
+  ctx.fillStyle="#444";
+  ctx.fillRect(0,groundY,canvas.width,50);
+
+  // DRAW ZORTMEN
+  ctx.fillStyle="black";
+  ctx.beginPath();
+  ctx.ellipse(zort.x+30,zort.y+30,30,30,0,0,Math.PI*2);
+  ctx.fill();
+  ctx.fillRect(body.x,body.y,body.w,body.h);
+
+  // DRAW ANTİZORT
+  ctx.fillStyle="red";
+  ctx.fillRect(anti.x,anti.y,anti.w,anti.h);
+
+  // DEATH
+  if(collide(body,anti)){
+    alive = false;
+    msg.style.display = "block";
+  }
+
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+
+</body>
+</html>
+

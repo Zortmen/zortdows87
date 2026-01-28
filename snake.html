@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>ZortSnake 🐍</title>
+<style>
+  html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    background:#111;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:Arial, sans-serif;
+    user-select:none;
+  }
+
+  #gameBox{
+    position:relative;
+  }
+
+  canvas{
+    background:#000;
+    border:4px solid #0f0;
+  }
+
+  #score{
+    color:#0f0;
+    text-align:center;
+    margin-bottom:8px;
+    font-size:18px;
+  }
+
+  #info{
+    color:#aaa;
+    text-align:center;
+    font-size:12px;
+    margin-top:6px;
+  }
+</style>
+</head>
+<body>
+
+<div id="gameBox">
+  <div id="score">Skor: 0</div>
+  <canvas id="game" width="400" height="400"></canvas>
+  <div id="info">Yön tuşlarıyla oyna • Çarpınca reset</div>
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const box = 20;
+const size = canvas.width / box;
+
+let snake, food, dir, score, game;
+
+function start(){
+  snake = [{x:10,y:10}];
+  food = spawnFood();
+  dir = "RIGHT";
+  score = 0;
+  document.getElementById("score").innerText="Skor: 0";
+  clearInterval(game);
+  game = setInterval(loop,120);
+}
+
+function spawnFood(){
+  return {
+    x: Math.floor(Math.random()*size),
+    y: Math.floor(Math.random()*size)
+  };
+}
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="ArrowUp" && dir!=="DOWN") dir="UP";
+  if(e.key==="ArrowDown" && dir!=="UP") dir="DOWN";
+  if(e.key==="ArrowLeft" && dir!=="RIGHT") dir="LEFT";
+  if(e.key==="ArrowRight" && dir!=="LEFT") dir="RIGHT";
+});
+
+function loop(){
+  ctx.fillStyle="#000";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  let head={...snake[0]};
+  if(dir==="UP") head.y--;
+  if(dir==="DOWN") head.y++;
+  if(dir==="LEFT") head.x--;
+  if(dir==="RIGHT") head.x++;
+
+  // çarpma
+  if(
+    head.x<0 || head.y<0 ||
+    head.x>=size || head.y>=size ||
+    snake.some(s=>s.x===head.x && s.y===head.y)
+  ){
+    start();
+    return;
+  }
+
+  snake.unshift(head);
+
+  if(head.x===food.x && head.y===food.y){
+    score++;
+    document.getElementById("score").innerText="Skor: "+score;
+    food=spawnFood();
+  }else{
+    snake.pop();
+  }
+
+  // yılan
+  ctx.fillStyle="#0f0";
+  snake.forEach(s=>{
+    ctx.fillRect(s.x*box,s.y*box,box-1,box-1);
+  });
+
+  // yemek
+  ctx.fillStyle="red";
+  ctx.fillRect(food.x*box,food.y*box,box-1,box-1);
+}
+
+start();
+</script>
+
+</body>
+</html>
+

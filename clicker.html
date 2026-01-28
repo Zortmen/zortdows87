@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html><head>
+    <style>
+      button {
+        background-color: blueviolet;
+        color: lightblue;
+        width: 140px;
+        height: 60px;
+        font-size: 25px;
+        border-radius: 25%;
+        transition: 0.3s;
+      }
+      .buton:hover {
+        background-color: green;
+        transform: scale(1.1);
+      }
+      h1 {
+        color: black;
+        background-color: #f0f0f0;
+        border: 2px solid black;
+      }
+      .kart {
+        width: 200px;
+        height: 150px;
+        background-color: #f0f0f0;
+      }
+      .kart:hover {
+        background-color: white;
+        transform: scale(1.1);
+      }
+    </style>
+  </head>
+<body>
+<script>
+  let deger = 0
+  let x = 1
+</script>
+<button class="buton" onclick="sayi()">bas!</button>
+<h1 id="yazi">selam!</h1>
+<script>
+function sayi() {
+  deger += x;
+  document.getElementById("yazi").innerHTML =
+    Math.floor(deger * 10) / 10;
+  x = deger / 10;
+}
+
+function x100() {
+  if (deger >= 100) {
+    deger -= 100;
+    x = 20;
+    document.getElementById("yazi").innerHTML =
+      Math.floor(deger * 10) / 10;
+  }
+}
+
+function x200() {
+  if (deger >= 200) {
+    deger -= 200;
+    x = 50;
+    document.getElementById("yazi").innerHTML =
+      Math.floor(deger * 10) / 10;
+  }
+}
+</script>
+
+<button onclick="x100()" class="kart">Fazla Artma +20 <p>100TL</p></button>
+<button onclick="x200()" class="kart">Fazla Artma +50 <p>200TL</p></button>
+
+ 
+</body></html>

@@ -207,6 +207,11 @@ if(localStorage.getItem("user")){
   <img src="https://img.icons8.com/color/96/calculator.png">
   <div>Hesap Makinesi</div>
 </div>
+<div class="icon" onclick="openWindow('store')">
+  <img src="https://img.icons8.com/color/96/shop.png">
+  <div>Zortdows Store</div>
+</div>
+
 
     <!-- Chrome -->
     <div class="icon" onclick="openWindow('chrome')">
@@ -262,7 +267,7 @@ if(localStorage.getItem("user")){
     <div class="notepad-toolbar">
         <button onclick="newFile()">Yeni</button>
         <button onclick="saveFile()">Kaydet</button>
-        <select id="fileList" onchange="loadFile()"><option value="zortmen">zortmen</option></select>
+        <select id="fileList" onchange="loadFile()"></select>
     </div>
 
     <textarea id="textArea" placeholder="Metin yaz..."></textarea>
@@ -281,7 +286,7 @@ if(localStorage.getItem("user")){
   <h3>🎨 Görünüm</h3>
   <input id="bgUrl" placeholder="Arka plan linki gir">
   <button onclick="changeBackground()">Uygula</button>
-  <p>Bu sahte OS'u <strong>İbrahim Çınar Arslan</strong> yapmıştır.</p>
+  <p>Bu webOS'u <strong>İbrahim Çınar Arslan</strong> yapmıştır.</p>
 
 
 </div>
@@ -300,7 +305,7 @@ if(localStorage.getItem("user")){
         <button onclick="newPy()">Yeni</button>
         <button onclick="savePy()">Kaydet</button>
         <button onclick="runPy()">Çalıştır ▶</button>
-        <select id="pyList" onchange="loadPy()"><option value="zortmen">zortmen</option></select>
+        <select id="pyList" onchange="loadPy()"></select>
     </div>
 
     <textarea id="pyCode" placeholder="print('Merhaba')"></textarea>
@@ -327,6 +332,118 @@ if(localStorage.getItem("user")){
         </div>
     </div>
 </div>
+<div class="window" id="store">
+  <div class="titlebar">
+    Zortdows Store
+    <span onclick="closeWindow('store')">✖</span>
+  </div>
+
+  <div style="padding:10px;display:grid;grid-template-columns:repeat(auto-fill,180px);gap:10px" id="storeList"></div>
+</div>
+<script>
+// 🏪 STORE UYGULAMALARI
+const STORE_APPS = [
+  { id:"superzort", name:"Super Zort", icon:"https://img.icons8.com/color/96/super-mario.png", url:"mario.html" },
+  { id:"snake", name:"ZortSnake", icon:"https://img.icons8.com/color/96/snake.png", url:"snake.html" },
+  { id:"clicker", name:"ZortClicker", icon:"https://img.icons8.com/color/96/mouse.png", url:"clicker.html" },
+  { id:"zortchat", name:"ZortCraft", icon:"https://img.icons8.com/color/96/mine.png", url:"mc.html" },
+  { id:"zortjump", name:"ZortJump", icon:"https://img.icons8.com/color/96/ninja.png", url:"zort.html" },
+];
+
+let installedApps = JSON.parse(localStorage.getItem("zortdows_installed")) || [];
+
+function saveApps(){
+  localStorage.setItem("zortdows_installed", JSON.stringify(installedApps));
+}
+
+// 🧱 STORE LİSTE
+function loadStore(){
+  storeList.innerHTML="";
+  STORE_APPS.forEach(app=>{
+    const installed = installedApps.includes(app.id);
+    storeList.innerHTML += `
+      <div style="background:#eee;color:#000;border-radius:10px;padding:10px;text-align:center">
+        <img src="${app.icon}" width="64"><br>
+        <b>${app.name}</b><br>
+        <button onclick="installApp('${app.id}')" ${installed?"disabled":""}>
+          ${installed?"Yüklü":"Yükle"}
+        </button>
+      </div>
+    `;
+  });
+}
+
+function installApp(id){
+  if(!installedApps.includes(id)){
+    installedApps.push(id);
+    saveApps();
+    loadStore();
+    loadDesktopApps();
+  }
+}
+
+// 🖥️ MASAÜSTÜNE KURULU UYGULAMALAR
+function loadDesktopApps(){
+  const desktop = document.querySelector(".desktop");
+
+  desktop.querySelectorAll(".app-icon").forEach(e=>e.remove());
+
+  installedApps.forEach(id=>{
+    const app = STORE_APPS.find(a=>a.id===id);
+    if(!app) return;
+
+    const div = document.createElement("div");
+    div.className = "icon app-icon";
+
+    div.innerHTML = `
+      <img src="${app.icon}">
+      <div>${app.name}</div>
+    `;
+
+    // 🔴 İŞTE TAM BURASI 🔴
+    div.dataset.appId = app.id;
+
+    const savedName = localStorage.getItem("app_name_"+app.id);
+    if(savedName){
+      div.querySelector("div").innerText = savedName;
+    }
+    // 🔴 BURAYA KADAR 🔴
+
+    div.onclick = ()=>openApp(app);
+    desktop.appendChild(div);
+  });
+}
+
+
+// 🪟 APP AÇ
+function openApp(app){
+  let win = document.createElement("div");
+  win.className="window";
+  win.style.display="block";
+  win.style.left="120px";
+  win.style.top="80px";
+  win.style.zIndex=++topZ;
+
+  win.innerHTML=`
+    <div class="titlebar">
+      ${app.name}
+      <div>
+        <span onclick="toggleFullScreen(this)" style="cursor:pointer;margin-right:8px">⛶</span>
+        <span onclick="this.closest('.window').remove()">✖</span>
+      </div>
+    </div>
+    <iframe src="${app.url}"></iframe>
+  `;
+
+  document.body.appendChild(win);
+}
+
+
+// İlk yükleme
+loadStore();
+loadDesktopApps();
+</script>
+
 
 <div class="window" id="gameWindow">
     <div class="titlebar">
@@ -410,24 +527,29 @@ document.querySelectorAll(".icon").forEach((icon,i)=>{
 </div>
 
 <div class="task-icon" onclick="openWindow('gameWindow')">
-  <img src="https://img.icons8.com/color/96/controller.png"width="30px">
+  <img src="https://img.icons8.com/color/96/controller.png" width="30px">
 </div>
 <div class="task-icon" onclick="openWindow('paint')">
-  <img src="https://img.icons8.com/color/96/paint.png"width="30px">
+  <img src="https://img.icons8.com/color/96/paint.png" width="30px">
 </div>
 
 <div class="task-icon" onclick="openWindow('calculator')">
-  <img src="https://img.icons8.com/color/96/calculator.png"width="30px">
+  <img src="https://img.icons8.com/color/96/calculator.png" width="30px">
+</div>
+<div class="task-icon" onclick="openWindow('store')">
+     <img src="https://img.icons8.com/color/96/shop.png" width="30px">
 </div>
 
+
 <div class="task-icon" onclick="openWindow('chrome')">
-  <img src="https://img.icons8.com/color/96/chrome.png"width="30px">
+  <img src="https://img.icons8.com/color/96/chrome.png" width="30px">
 </div>
 <div class="task-icon" onclick="openWindow('notepad')">
-  <img src="https://img.icons8.com/color/96/notepad.png"width="30px">
+  <img src="https://img.icons8.com/color/96/notepad.png" width="30px">
 </div>
-<div id="saat">11:20 26.01.2026</div>
+<div id="saat">15:08 27.01.2026</div>
 </div>
+<div class="window" id="store">
 
   
 </div>
@@ -453,6 +575,19 @@ function saatiGuncelle() {
         `${saat}:${dakika} ${gun}.${ay}.${yil}`;
 }
 
+//iframe engeli 
+if (window.top !== window.self) {
+    document.body.innerHTML = `
+        <div style="
+            font-family: monospace;
+            background:#000;
+            color:#0f0;
+            padding:20px">
+            🚫 zortOS iframe içinde çalıştırılamaz.
+        </div>
+    `;
+}
+
 saatiGuncelle();
 setInterval(saatiGuncelle, 1000);
 /* Pencere */
@@ -472,18 +607,6 @@ function closeWindow(id) {
     document.getElementById(id).style.display = "none";
 }
 
-//iframe engeli 
-if (window.top !== window.self) {
-    document.body.innerHTML = `
-        <div style="
-            font-family: monospace;
-            background:#000;
-            color:#0f0;
-            padding:20px">
-            🚫 zortOS iframe içinde çalıştırılamaz.
-        </div>
-    `;
-}
 
 
 
@@ -585,6 +708,20 @@ function loadPyList(){
     }
 }
 loadPyList();
+
+const today = new Date();
+const day = today.getDate();
+const month = today.getMonth(); // Ocak = 0
+
+if (day === 26 && month === 0) {
+  alert("🎉🎉 Bugün 26 Ocak! ZORTDOWS GÜNÜ KUTLU OLSUN! 🎉🎉");
+}
+
+
+
+
+
+
 
 /* PYTHON ÇALIŞTIR */
 function runPy(){
@@ -765,6 +902,80 @@ document.addEventListener("mousemove", (e) => {
 document.addEventListener("mouseup", () => {
   activeWindow = null;
 });
+</script>
+
+<!------------------------------------------------------------------------------>
+<div id="contextMenu" style="
+  position:fixed;
+  display:none;
+  background:#222;
+  color:white;
+  border-radius:6px;
+  box-shadow:0 0 10px black;
+  z-index:99999;
+  font-size:14px;
+">
+  <div class="cm-item" onclick="renameApp()">✏️ Adını Değiştir</div>
+  <div class="cm-item" onclick="deleteApp()">🗑️ Sil</div>
+</div>
+
+<style>
+.cm-item{
+  padding:8px 14px;
+  cursor:pointer;
+}
+.cm-item:hover{
+  background:#444;
+}
+</style>
+<script>
+let rightClickedAppId = null;
+let rightClickedIcon = null;
+
+// masaüstü app ikonlarına sağ tık
+document.addEventListener("contextmenu", e=>{
+  const icon = e.target.closest(".app-icon");
+  if(!icon) return;
+
+  e.preventDefault();
+
+  rightClickedAppId = icon.dataset.appId;
+  rightClickedIcon = icon;
+
+  const menu = document.getElementById("contextMenu");
+  menu.style.display="block";
+  menu.style.left = e.clientX + "px";
+  menu.style.top  = e.clientY + "px";
+});
+
+// boş yere tıklayınca menüyü kapat
+document.addEventListener("click", ()=>{
+  contextMenu.style.display="none";
+});
+
+// ✏️ ad değiştir
+function renameApp(){
+  const label = rightClickedIcon.querySelector("div");
+  const yeni = prompt("Yeni ad:", label.innerText);
+  if(yeni && yeni.trim()){
+    label.innerText = yeni.trim();
+    localStorage.setItem("app_name_"+rightClickedAppId, yeni.trim());
+  }
+  contextMenu.style.display="none";
+}
+
+// 🗑️ sil
+function deleteApp(){
+  if(!confirm("Bu uygulama kaldırılsın mı?")) return;
+
+  installedApps = installedApps.filter(id=>id!==rightClickedAppId);
+  localStorage.setItem("zortdows_installed", JSON.stringify(installedApps));
+  localStorage.removeItem("app_name_"+rightClickedAppId);
+
+  loadDesktopApps();
+  loadStore();
+  contextMenu.style.display="none";
+}
 </script>
 
 
