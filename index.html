@@ -197,7 +197,10 @@ if(localStorage.getItem("user")){
        <img src="https://img.icons8.com/color/96/controller.png">
        <div>Oyunlar</div>
     </div>
-
+<div class="icon" onclick="openWindow('htmlCompiler')"> 
+    <img src="https://img.icons8.com/color/96/html-5.png"> 
+    <div>HTML Editör</div> 
+</div>
     <div class="icon" onclick="openWindow('paint')">
        <img src="https://img.icons8.com/color/96/paint.png">
        <div>Paint</div>
@@ -229,7 +232,24 @@ if(localStorage.getItem("user")){
         <img src="https://img.icons8.com/color/96/settings.png">
         <div>Ayarlar</div>
     </div>
+<div class="window" id="htmlCompiler">
+    <div class="titlebar">
+        HTML Compiler
+        <span onclick="closeWindow('htmlCompiler')">✖</span>
+        <span onclick="toggleFullScreen(this)" style="cursor:pointer; margin-left:5px">⛶</span>
+    </div>
 
+    <div class="notepad-toolbar">
+        <button onclick="runHTML()">Çalıştır ▶</button>
+        <button onclick="document.getElementById('htmlInput').value=''">Temizle</button>
+    </div>
+
+    <div style="display: flex; flex-direction: column; height: calc(100% - 75px);">
+        <textarea id="htmlInput" placeholder="<h1>Merhaba Dünya</h1>" 
+            style="width: 100%; height: 50%; font-family: monospace; padding: 10px; border: none; border-bottom: 2px solid #ccc; outline: none;"></textarea>
+        <iframe id="htmlPreview" style="width: 100%; height: 50%; background: white; border: none;"></iframe>
+    </div>
+</div>
 <!-- CHROME -->
 <div class="window" id="chrome">
     <div class="titlebar">
@@ -372,7 +392,16 @@ function loadStore(){
     `;
   });
 }
-
+/* HTML ÇALIŞTIRICI */
+function runHTML() {
+    const code = document.getElementById('htmlInput').value;
+    const preview = document.getElementById('htmlPreview');
+    const previewDoc = preview.contentDocument || preview.contentWindow.document;
+    
+    previewDoc.open();
+    previewDoc.write(code);
+    previewDoc.close();
+}
 function installApp(id){
   if(!installedApps.includes(id)){
     installedApps.push(id);
@@ -981,3 +1010,4 @@ function deleteApp(){
 
 
 </body></html>
+
